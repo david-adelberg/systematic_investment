@@ -29,7 +29,7 @@ class ShortOnlyTradingModel(TradingModel):
     @staticmethod
     def calc_position_size(preds):
         preds[preds>0.0] = 0.0
-        tot = sum(abs(preds))
+        tot = preds.abs().sum()
         return((preds)/tot)
         
     @staticmethod

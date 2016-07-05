@@ -109,6 +109,6 @@ class RegressionAnalyzer(DFAnalyzer):
         
         positions = predictions.groupby(axis=0, level = predictions.index.names.index('Date'))
         positions = positions[self.pred_col_name].apply(calc_position_size)
-        positions.name = self.pos_col_name
+        positions.columns = [self.pos_col_name]
         combined_df = concat([predictions, positions], axis=1)
         return(combined_df)
