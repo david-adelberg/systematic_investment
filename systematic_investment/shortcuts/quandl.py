@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-
-"""
-Provides LongOnlyTradingModel, a class for strategies only involving long positions.
-"""
-
 __author__ = "David Adelberg"
 __copyright__ = "Copyright 2016, David Adelberg"
 __credits__ = ["David Adelberg"]
@@ -16,20 +10,17 @@ __license__ = """May be used by members of the Yale College Student Investment
 __version__ = "0.1.0"
 __maintainer__ = "David Adelberg"
 __email__ = "david.adelberg@yale.edu"
-__status__ = "Development"
+__status__ = "Prototype"
 
-from systematic_investment import TradingModel
-
-class LongOnlyTradingModel(TradingModel):
+def qd_bulk_downloader_func(info):
+    from systematic_investment.data.quandl.QuandlBulkDBLoader import QuandlBulkDBLoader
+    return(lambda: QuandlBulkDBLoader(info.downloaded_data.path))
     
-    def __init__(self, info):
-        super(LongOnlyTradingModel, self).__init__(info)
-        
-    @staticmethod
-    def calc_position_size(preds):
-        preds[preds<0.0] = 0.0
-        return(preds / preds.abs().sum())
-        
-    @staticmethod
-    def calc_transaction_cost(positions):
-        return(0.0)
+def qd_downloader_func(info):
+    """Returns a QuandlDBLoader constructor function.
+    
+    info: a Info object with an authtoken field.
+    
+    """
+    from systematic_investment.data import QuandlDBLoader
+    return(lambda: QuandlDBLoader(info.top().authtoken))

@@ -487,3 +487,35 @@ def transform_percentage(x):
     unskewed = transform_reduce_skewness(multiples, -2.0)
     unkurt = transform_reduce_kurtosis(unskewed, 0.5)
     return unkurt
+    """
+    
+    
+#def make_SF0_col_handler():
+#    codes = load_SF0_qd_codes()
+#    codes.set_index('Code', inplace=True)
+#    codes.sort_index(inplace=True)
+#    def res(col_name):
+#        qd_code = 'SF0/%s' % col_name
+#        try:
+#            name = codes.loc[qd_code]['Name']
+#        except:
+#            name = "%s: %s" % (qd_code, "Missing")
+#        return(name)
+#    return(res)
+    
+    
+
+    """
+    equity_info.dbs.INDUSTRY. \
+        set_path('download_and_save', 'SF0-tickers.csv'). \
+        downloader(creator=meta_loader_creator).set(no_compute_codes=True). \
+        set(english_to_symbol_indicator=default_english_to_symbol_indicator). \
+        set(indicator_handler=make_default_indicator_handler([], [])). \
+        set_path('process', load=True, path='SF0-tickers.csv'). \
+        set(symbol_name="Security", date_name="Date") 
+    """
+    
+    #set_path('downloaded_data', 'SF0-tickers.csv'). \
+    #'INDUSTRY-processed-data.csv',
+                # compute_names=make_default_compute_names([], identity),
+                # load=False, idx_to_datetime=identity, resample_method=None). \

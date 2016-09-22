@@ -21,8 +21,8 @@ __maintainer__ = "David Adelberg"
 __email__ = "david.adelberg@yale.edu"
 __status__ = "Development"
 
-from pandas import concat, DataFrame
-from .shortcuts import identity
+from systematic_investment.shortcuts import identity, default_combine_func
+from pandas import DataFrame
 
 class DBCombiner:
     def __init__(self, consolidated_dfs):
@@ -35,7 +35,7 @@ class DBCombiner:
         self._dfs = {name: df.sort_index() for (name, df) in consolidated_dfs.items()}
         self._combined = None
     
-    def combine(self, to_drop = [], combined_names = [None, None], max_na_prop=0.9, path='test_combine.csv', transformer=identity):
+    def combine(self, to_drop = [], combined_names = [None, None], max_na_prop=0.9, path='test_combine.csv', min_date='1900-01-01', combine_func=default_combine_func, transformer=identity):
         """Combines DataFrames.
         
         to_drop: a list of columns to drop.
@@ -50,12 +50,20 @@ class DBCombiner:
         
         """
         transformed_dfs = {key: transformer(df) for key, df in self._dfs.items()}
-        self._combined = concat(transformed_dfs.values(), axis=1, keys=transformed_dfs.keys())
+        self._combined = combine_func(transformed_dfs)
         self.drop_cols(to_drop)
         self.rm_cols(max_na_prop)
+        self.rm_rows(min_date)
         self._combined.columns.rename(combined_names, inplace=True)
         self._combined.to_csv(path)
         return(self)
+        
+    def rm_rows(self, min_date):
+        """Drops rows less than min_date"""
+
+        good_indices = [idx[0] >= min_date for idx in self._combined.index]        
+        
+        self._combined = self._combined.loc[good_indices]
         
     def drop_cols(self, to_drop):
         """Drops columns in to_drop.
@@ -88,4 +96,5 @@ class DBCombiner:
         selection = na_props.index[(na_props < max_na_prop)['Proportion NA'].tolist()]
         self._combined = self._combined[selection.tolist()]
         return(self)
+    
         

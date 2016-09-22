@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
 """
-Provides LongShortTradingModel, a class for strategies involving long and short positions.
+Provides ShortOnlyTradingModel, a class for strategies with only short positions.
 
-LongShortTradingModel extends TradingModel and implements calc_position_size and
-calc_transaction_cost.
 """
 
 __author__ = "David Adelberg"
@@ -21,15 +19,17 @@ __maintainer__ = "David Adelberg"
 __email__ = "david.adelberg@yale.edu"
 __status__ = "Development"
 
-from systematic_investment import TradingModel
+from .tradingmodel import TradingModel
 
-class LongShortTradingModel(TradingModel):
-    def __init__(self, info, **kwargs):
-        super(LongShortTradingModel, self).__init__(info, **kwargs)
+class ShortOnlyTradingModel(TradingModel):
+    
+    def __init__(self, info):
+        super(ShortOnlyTradingModel, self).__init__(info)
         
     @staticmethod
     def calc_position_size(preds):
-        tot = sum(abs(preds))
+        preds[preds>0.0] = 0.0
+        tot = preds.abs().sum()
         return((preds)/tot)
         
     @staticmethod

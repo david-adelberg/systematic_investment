@@ -20,7 +20,7 @@ __maintainer__ = "David Adelberg"
 __email__ = "david.adelberg@yale.edu"
 __status__ = "Development"
 
-from .DBLoader import DBLoader
+from systematic_investment.data.dbloader import DBLoader
 import Quandl as qd
 
 class QuandlDBLoader(DBLoader):

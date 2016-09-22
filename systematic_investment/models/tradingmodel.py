@@ -22,9 +22,11 @@ __email__ = "david.adelberg@yale.edu"
 __status__ = "Development"
 
 import pickle
+import pyfolio as pf
+from pandas import to_datetime
 
 class TradingModel:
-    def __init__(self, info, **kwargs):
+    def __init__(self, info, split_date=None, **kwargs):
         """Creates a TradingModel object.
         
         info: an Info object with settings. 
@@ -33,6 +35,7 @@ class TradingModel:
         
         """
         path_name = info.analyzer.path
+        self._split_date=split_date
         if info.analyzer.load:
             with open(path_name, "rb") as f:
                 self.analyzer = pickle.load(f)
@@ -40,14 +43,20 @@ class TradingModel:
             y_name = info.y_key
             self.analyzer = info.analyzer.create()
             self.analyzer.analyze(y_name, path_name, **kwargs)
+            
+    """Only works in models with daily data"""
+    def print_tear_sheet(self):
+        rets = self.analyzer.compute_model_returns(self.calc_position_size, self.calc_transaction_cost)
+        rets.index = rets.index.to_datetime().tz_localize('US/Eastern')
+        pf.create_returns_tear_sheet(rets, live_start_date=to_datetime(self.analyzer._split_date))
         
     def plot_historic_returns(self):
         """Plot historic returns of model."""
-        self.analyzer.plot_model_returns(self.calc_position_size, self.calc_transaction_cost)
+        self.analyzer.plot_model_returns(self.calc_position_size, self.calc_transaction_cost, self._split_date)
         
     def plot_hypothetical_portfolio(self):
         """Plot the hypothetical returns of a portfolio based off this model."""
-        self.analyzer.plot_hypothetical_portfolio_returns(self.calc_position_size, self.calc_transaction_cost)
+        self.analyzer.plot_hypothetical_portfolio_returns(self.calc_position_size, self.calc_transaction_cost, self._split_date)
         
     def boxplots_by(self, by):
         """Make boxplots grouping by argument by.

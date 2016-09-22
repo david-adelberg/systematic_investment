@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 """
-Provides all imports for the systematic_investment package.
+In progress
+
+Provides utility scripts for the equity trading model.
 """
 
 __author__ = "David Adelberg"
@@ -16,9 +18,17 @@ __license__ = """May be used by members of the Yale College Student Investment
 __version__ = "0.1.0"
 __maintainer__ = "David Adelberg"
 __email__ = "david.adelberg@yale.edu"
-__status__ = "Development"
+__status__ = "Prototype"
 
-from . import analysis
-from . import data
-from . import models
-from . import shortcuts
+from pandas import read_csv
+
+def split_data_by(df, split_by='Sector'): 
+    industry_table = read_csv("data/SF0-tickers.csv")
+    security_types = set(df[split_by]).tolist()
+    df = df.T
+    sec_type_to_cols = {sec_type: [] for sec_type in security_types}
+    for fundamentals_row in df:
+        ticker = row.name[1]
+        ticker_type = industry_table[ticker][split_by]
+    
+equities_data = read_csv("data/SF0-processed-data.csv")

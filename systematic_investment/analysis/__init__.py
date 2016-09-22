@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-
-"""
-Provides all imports for the systematic_investment package.
-"""
-
 __author__ = "David Adelberg"
 __copyright__ = "Copyright 2016, David Adelberg"
 __credits__ = ["David Adelberg"]
@@ -18,7 +12,5 @@ __maintainer__ = "David Adelberg"
 __email__ = "david.adelberg@yale.edu"
 __status__ = "Development"
 
-from . import analysis
-from . import data
-from . import models
-from . import shortcuts
+from .dfanalyzer import DFAnalyzer
+from .regressionanalyzer import RegressionAnalyzer

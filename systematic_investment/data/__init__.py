@@ -1,10 +1,3 @@
-#!/usr/bin/env python
-
-"""
-Provides ShortOnlyTradingModel, a class for strategies with only short positions.
-
-"""
-
 __author__ = "David Adelberg"
 __copyright__ = "Copyright 2016, David Adelberg"
 __credits__ = ["David Adelberg"]
@@ -17,21 +10,10 @@ __license__ = """May be used by members of the Yale College Student Investment
 __version__ = "0.1.0"
 __maintainer__ = "David Adelberg"
 __email__ = "david.adelberg@yale.edu"
-__status__ = "Development"
+__status__ = "Prototype"
 
-from systematic_investment import TradingModel
-
-class ShortOnlyTradingModel(TradingModel):
-    
-    def __init__(self, info):
-        super(ShortOnlyTradingModel, self).__init__(info)
-        
-    @staticmethod
-    def calc_position_size(preds):
-        preds[preds>0.0] = 0.0
-        tot = preds.abs().sum()
-        return((preds)/tot)
-        
-    @staticmethod
-    def calc_transaction_cost(positions):
-        return(0.0)
+from .dataloader import DataLoader
+from .dbcombiner import DBCombiner
+from .dbloader import DBLoader
+from .dbsymbol import DBSymbol
+from .quandl import *

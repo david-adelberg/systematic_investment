@@ -24,7 +24,7 @@ __maintainer__ = "David Adelberg"
 __email__ = "david.adelberg@yale.edu"
 __status__ = "Development"
 
-from .DBCombiner import DBCombiner
+from .dbcombiner import DBCombiner
 from pandas import read_csv
 
 class DataLoader:
@@ -105,12 +105,20 @@ class DataLoader:
             else:
                 if verbose:
                     print("Processing data from %s" % db_name)
-                downloader.process(db_info["process"]["path"], db_info["process"]["compute_names"], db_info["english_to_symbol_indicator"], db_info["indicator_handler"], db_info["symbol_name"], db_info["date_name"])
+                
+                the_kwargs = {}
+                if "idx_to_datetime" in db_info["process"]:
+                    the_kwargs["idx_to_datetime"] = db_info["process"]["idx_to_datetime"]
+                if "resample_method" in db_info["process"]:
+                    the_kwargs["resample_method"] = db_info
+                    
+                downloader.process(**db_info, **db_info["process"])
+                #downloader.process(db_info["process"]["path"], db_info["process"]["compute_names"], db_info["english_to_symbol_indicator"], db_info["indicator_handler"], db_info["symbol_name"], db_info["date_name"], **the_kwargs)
             res[db_name] = downloader
             
         return(res)
         
-    def do_combining(self, processed_dfs, to_drop = [], verbose=True):
+    def do_combining(self, processed_dfs, min_date='1900-01-01', to_drop = [], verbose=True):
         """Combines processed_dfs according the settings in self._info.
         
         processed_dfs: a dict mapping names to DataFrames
@@ -122,7 +130,7 @@ class DataLoader:
         """
         
         combiner = DBCombiner(processed_dfs)
-        return(combiner.combine(to_drop=to_drop, combined_names=self._info["combined_df"]["names"], path=self._info["combined_df"]["path"], transformer=self._info["combined_df"]["transformer"]))
+        return(combiner.combine(to_drop=to_drop, min_date=min_date, combined_names=self._info["combined_df"]["names"], path=self._info["combined_df"]["path"], transformer=self._info["combined_df"]["transformer"], combine_func=self._info["combined_df"]["combine_func"]))
         
     def load(self, verbose=True):
         """Performs loading, processing, and combining according to self._info.
@@ -134,5 +142,5 @@ class DataLoader:
         downloads = self.do_downloads(verbose)
         processed = self.do_processing(downloads, verbose)
         dfs = {key: d._processed_data for key, d in processed.items()}
-        combiner = self.do_combining(dfs, to_drop=self._info["combined_df"]["to_drop"], verbose=verbose)
+        combiner = self.do_combining(dfs, min_date=self._info["combined_df"]["min_date"], to_drop=self._info["combined_df"]["to_drop"], verbose=verbose)
         return(combiner)

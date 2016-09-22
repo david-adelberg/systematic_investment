@@ -20,11 +20,9 @@ __maintainer__ = "David Adelberg"
 __email__ = "david.adelberg@yale.edu"
 __status__ = "Prototype"
 
-from .DBLoader import DBLoader
+from systematic_investment.data.dbloader import DBLoader
 from pandas import read_csv, DataFrame
-from .shortcuts import identity, default_english_to_symbol_indicator
-from .shortcuts import default_multi_index_resample_method, multi_idx_to_datetime
-
+from systematic_investment.shortcuts import *
 
 class QuandlBulkDBLoader(DBLoader):
     

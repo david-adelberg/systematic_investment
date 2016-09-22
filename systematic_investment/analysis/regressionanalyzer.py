@@ -23,16 +23,19 @@ __email__ = "david.adelberg@yale.edu"
 __status__ = "Development"
 
 from pandas import DataFrame, concat
-from sklearn.preprocessing import Imputer
+from sklearn.preprocessing import Imputer, LabelEncoder
 from sklearn import linear_model
 import statsmodels.api as sm
+from statsmodels.tools.tools import categorical
 import pickle
-from .DFAnalyzer import DFAnalyzer
+from .dfanalyzer import DFAnalyzer
+from systematic_investment.shortcuts import *
+import numpy as np
 
-from .shortcuts import unif_to_normal
+from systematic_investment.shortcuts import unif_to_normal
 
 class RegressionAnalyzer(DFAnalyzer):
-    def __init__(self, df, y_key, **kwargs):
+    def __init__(self, df, y_key, split_date, constructor=sm.OLS, **kwargs):
         """Creates a RegressionAnalyzer.
         
         df: DataFrame to analyze.
@@ -46,9 +49,33 @@ class RegressionAnalyzer(DFAnalyzer):
         
         self._lm_x = None
         self._lm_y = None
-        self._lm = None        
+        self._lm = None
+        self._split_date = split_date
+        self._constructor=constructor
+
+    def get_lm_y_x(self, y_key, data):
+        lm_y = data[y_key]
+        drop_y = data.drop(y_key, axis=1)
+
+        to_impute = drop_y.select_dtypes(include=[np.number])
+        others = drop_y.select_dtypes(exclude=[np.number])
+        #others_matrix = categorical(others.values, col=0, drop=True) # Fix later when necessary
+        #others_matrix = categorical(others.values)
+        
+        #others_array = [LabelEncoder().fit_transform(others[col_name]) for col_name in others.columns]
+        #others_array = np.asarray(others_array).T
+        #others = DataFrame(others).T
+        
+        imp_inp = to_impute.values.tolist()
+        lm_x = Imputer(strategy='median').fit_transform(imp_inp)
+        lm_x = np.concatenate([lm_x, others], axis=1)#others_matrix
+        #df_x = DataFrame(lm_x)
+        #df_x.index = to_impute.index
+        #df_x.columns = to_impute.columns
+        #lm_x = concat([lm_x, others_array], axis=1).values.tolist() #df_x, others
+        return(lm_y, lm_x)
             
-    def analyze_impl(self, y_key, constructor=sm.OLS, normals=True, path='model.pickle', *args):
+    def analyze_impl(self, y_key, normals=True, path='model.pickle', *args, **kwargs):
         """Performs regression analysis.
 
         y_key: the y key.
@@ -61,16 +88,24 @@ class RegressionAnalyzer(DFAnalyzer):
         
         args: unused.
         
+        kwargs: split_date: split into training and test here.
+        
         """
         self._y_key = y_key
         data = self._to_analyze#.dropna(subset=[self._y_key], axis=1)
+            
         if normals:
-            data = data.rank(pct=True).apply(unif_to_normal)
-        self._lm_y = data[y_key]
-        drop_y = data.drop(y_key, axis=1)
-        imp_inp = drop_y.values.tolist()
-        self._lm_x = Imputer(strategy='median').fit_transform(imp_inp)
-        self._lm = constructor(self._lm_y, self._lm_x).fit()
+            ranked = data.select_dtypes(include=[np.number])
+            ranked = ranked.rank(pct=True).apply(unif_to_normal)
+            others = data.select_dtypes(exclude=[np.number])
+            data = concat([ranked, others], axis=1)
+            
+        train_y, train_x = self.get_lm_y_x(self._y_key, data[:self._split_date])
+        all_y, all_x = self.get_lm_y_x(self._y_key, data)
+
+        self._lm = self._constructor(train_y, train_x).fit()
+        self._lm_x = all_x
+        self._lm_y = all_y
         
     def print_analysis_results(self, print_coefs=True):
         """Prints results of analysis.
@@ -90,7 +125,7 @@ class RegressionAnalyzer(DFAnalyzer):
         perfect_x = [[y] for y in self._lm_y]
         perfect.fit(perfect_x, self._lm_y)
         
-        splt = self.make_subplot()
+        splt = make_subplot()
         splt.scatter(self._lm.predict(self._lm_x), self._lm_y, color='black')
         splt.plot(perfect.predict(perfect_x), self._lm_y, color='blue')
         

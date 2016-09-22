@@ -24,16 +24,11 @@ __maintainer__ = "David Adelberg"
 __email__ = "david.adelberg@yale.edu"
 __status__ = "Development"
 
-"""
-Created on Sun Jun 26 09:16:48 2016
-
-@author: davidadelberg
-"""
-
 from .DBSymbol import DBSymbol
-from .shortcuts import qd_downloader_func, reg_create_func
+from .shortcuts import qd_downloader_func, reg_create_func, data_dir, identity
+from .InfoNew import Info
     
-class Info(object):
+class Settings(Info):
     def __init__(self, data_dir='/', up=None, **kwargs):
         """Creates an Info object.
         
@@ -44,26 +39,11 @@ class Info(object):
         kwargs: unused.
         
         """
+        super(Settings, self).__init__(**kwargs)
+        
         self._up=up
         self._data_dir=data_dir
-        
-        for key, val in kwargs.items():
-            self.__setattr__(key, val)
-            
-    def attr_dict(self):
-        """Gets nested dict of user-supplied data."""
-        
-        base_keys = set(Info().__dict__.keys())
-        self_keys = set(self.__dict__.keys())
-        res = {}
-        for key in self_keys.difference(base_keys):
-            val = self.__dict__[key]
-            try:
-                res[key] = val.attr_dict()
-            except AttributeError:
-                res[key] = val
-        
-        return(res)
+        self._attr_handler = lambda name: Settings(data_dir=self._data_dir, up=self)
         
     def symbol(self, path, *args, **kwargs):
         """Adds a symbol to the object.
@@ -83,23 +63,6 @@ class Info(object):
             self.symbols = [sym]
         
         return(self)
-        
-    def info(self, name, **kwargs):
-        """Sets self.name to be an Info object with parent self.
-        
-        name: name of the field created.
-        
-        kwargs: passed to Info.
-        
-        """
-        i = Info(up=self, **kwargs)
-        self.__setattr__(name, i)
-        
-        return(i)
-        
-    def up(self):
-        """Gets parent Info object."""
-        return(self._up)
         
     def _fix_path(self, path):
         """Gets the path name after prepending self._data_dir."""
@@ -136,31 +99,39 @@ class Info(object):
         """
         self.analyzer.create = creator(self.top())
         return(self)
+      
+    def _default_attr_handler(self, name):
+        return(Settings(data_dir=self._data_dir, up=self))
         
-    def set(self, **kwargs):
-        """Adds fields to Info.
+    def make_default_db(self, name):
+        if 'main_db_name' not in self.top().__dict__:
+            self.top().main_db_name=name
         
-        kwargs: Each key, value pair corresponds to a new field in the object.
+        self.__getattr__(name).set(
+            code_builder=make_default_code_builder(name),
+            name_builder=default_name_builder,
+            english_to_symbol_indicator=default_english_to_symbol_indicator,
+            indicator_handler=make_default_indicator_handler([],[])). \
+            set_path('download_and_save', name+'_data.csv'). \
+            set_path('process', name+"_processed_data.csv",
+                     compute_names=make_default_compute_names(['Date'], identity)). \
+            set(symbol_name='Security', date_name='Date')
         
-        """
-        for key, val in kwargs.items():
-            self.__setattr__(key, val)
+        return(self.__getattr__(name))                         
         
-        return(self)
+    def _db_attr_handler(self, name):
+        res = self._default_attr_handler(name)
+        res._attr_handler = self.make_default_db
+        return(res)
         
-    def top(self):
-        """Gets the root Info object."""
-        if self.up() is None:
-            return(self)
-        else:
-            return(self.up().top())
-        
-    def __getattr__(self, name):
-        """Creates a new field name set to a child Info object.
-        
-        name: the name of the field to create.
-        """
-        
-        self.__setattr__(name, Info(data_dir=self._data_dir, up=self))
-        return(self.__dict__[name])
-
+    @staticmethod
+    def create(name):
+        res = Settings(data_dir=data_dir)
+        res.dbs._attr_handler =  res.dbs._db_attr_handler
+        res.set_path('combined_df', 'combined_%s_data.csv' % name,
+                     labels=['Date', 'Security'], to_drop=[], transformer=identity,
+                     names=['DB', 'Indicator']). \
+            set_path('analyzer', name+'_analyzer.pickle', load=False). \
+            create_analyzer()
+            
+        return(res)

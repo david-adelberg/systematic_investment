@@ -24,8 +24,7 @@ __status__ = "Development"
 from pandas import DataFrame, read_csv, concat, to_datetime
 import itertools
 from numpy import array
-import Quandl as qd
-from .shortcuts import identity, default_resample_method
+from systematic_investment.shortcuts import identity, default_resample_method
 from urllib.error import URLError
 
 class DBLoader:
@@ -162,7 +161,7 @@ class DBLoader:
         
     def process(self, path, compute_names, english_to_symbol_indicator,
                 indicator_handler, symbol_name, date_name='Date',
-                resample_method=default_resample_method, idx_to_datetime=to_datetime):
+                resample_method=default_resample_method, idx_to_datetime=to_datetime, **kwargs):
         """Processes data.
         
         path: write processed data here.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Provides all imports for the systematic_investment package.
+Provides LongOnlyTradingModel, a class for strategies only involving long positions.
 """
 
 __author__ = "David Adelberg"
@@ -18,7 +18,18 @@ __maintainer__ = "David Adelberg"
 __email__ = "david.adelberg@yale.edu"
 __status__ = "Development"
 
-from . import analysis
-from . import data
-from . import models
-from . import shortcuts
+from .tradingmodel import TradingModel
+
+class LongOnlyTradingModel(TradingModel):
+    
+    def __init__(self, info):
+        super(LongOnlyTradingModel, self).__init__(info)
+        
+    @staticmethod
+    def calc_position_size(preds):
+        preds[preds<0.0] = 0.0
+        return(preds / preds.abs().sum())
+        
+    @staticmethod
+    def calc_transaction_cost(positions):
+        return(0.0)

@@ -21,12 +21,9 @@ __maintainer__ = "David Adelberg"
 __email__ = "david.adelberg@yale.edu"
 __status__ = "Development"
 
-#from get_data import FXData
-from pandas import concat
-from pandas.tools.plotting import boxplot_frame_groupby
-import matplotlib.pyplot as plt
+from systematic_investment.shortcuts import make_subplot, plot_returns
 from scipy.stats import zscore, probplot
-from numpy import abs
+from pandas import concat
 import pickle
 
 class DFAnalyzer:
@@ -145,15 +142,15 @@ class DFAnalyzer:
         """
         data = self._to_analyze[col_name].dropna().tolist()
         if 'hist' in plot_type:
-            splt = self.make_subplot()
+            splt = make_subplot()
             splt.hist(data)
             splt.set_xlabel(col_name)
         if 'boxplot' in plot_type:
-            splt = self.make_subplot()
+            splt = make_subplot()
             splt.boxplot(data)
             splt.set_xlabel(col_name)
         if 'probplot' in plot_type:
-            splt = self.make_subplot()
+            splt = make_subplot()
             probplot(data, dist="norm", plot=splt)
             splt.set_xlabel(col_name)
             
@@ -263,7 +260,7 @@ class DFAnalyzer:
         returns.name = 'Strategy returns by year (%)'
         return(returns)
         
-    def plot_model_returns(self, calc_position_size, calc_transaction_cost):
+    def plot_model_returns(self, calc_position_size, calc_transaction_cost, live_date=None):
         """Plots model returns by year.
         
         calc_position_size: method to compute position sizes.
@@ -271,12 +268,10 @@ class DFAnalyzer:
         calc_transaction_cost: method to compute transaction costs.
         
         """
-        plt.figure()
         returns = self.compute_model_returns(calc_position_size, calc_transaction_cost)
-        ax = self.make_subplot()
-        returns.plot(ax=ax)
+        plot_returns(returns, live_date)
         
-    def plot_hypothetical_portfolio_returns(self, calc_position_size, calc_transaction_cost):
+    def plot_hypothetical_portfolio_returns(self, calc_position_size, calc_transaction_cost, live_date=None):
         """Plot returns of a hypothetical portfolio over the lifetime of the model.
         
         calc_position_size: method to compute position size
@@ -286,7 +281,7 @@ class DFAnalyzer:
         """
         returns = self.compute_model_returns(calc_position_size, calc_transaction_cost)
         compounded = (1.0 + (returns / 100.0)).cumprod()
-        compounded.plot()
+        plot_returns(compounded, live_date)
         
     def make_boxplots(self, by):
         """Method to make boxplots for groupings by argument by.
@@ -294,12 +289,7 @@ class DFAnalyzer:
         by: group by this to make boxplots.
         
         """
-        self.make_subplot()
-        df = self._original_df[self._y_key].dropna()
-        grouped = df.groupby(axis=0, level=df.index.names.index(by))
-        boxplot_frame_groupby(grouped, subplots=False, rot=90, return_type='axes')
-        plt.title(self._y_key)
 
-    def make_subplot(self):
-        """Utility method to make a subplot."""
-        return(plt.figure().add_subplot(1,1,1))
+        df = self._original_df[self._y_key].dropna()
+        title = self._y_key
+        shortcuts.make_boxplots(df, by, title)

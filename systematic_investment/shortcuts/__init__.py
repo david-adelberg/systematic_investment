@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-
-"""
-Provides all imports for the systematic_investment package.
-"""
-
 __author__ = "David Adelberg"
 __copyright__ = "Copyright 2016, David Adelberg"
 __credits__ = ["David Adelberg"]
@@ -16,9 +10,12 @@ __license__ = """May be used by members of the Yale College Student Investment
 __version__ = "0.1.0"
 __maintainer__ = "David Adelberg"
 __email__ = "david.adelberg@yale.edu"
-__status__ = "Development"
+__status__ = "Prototype"
 
-from . import analysis
-from . import data
-from . import models
-from . import shortcuts
+from .analysis import *
+from .file import *
+from .math import *
+from .plotting import *
+from .quandl import *
+from .trading_system_test import *
+from .util import *
