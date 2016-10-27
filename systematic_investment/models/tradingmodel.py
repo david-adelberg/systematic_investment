@@ -82,3 +82,6 @@ class TradingModel:
         """
         raise(NotImplementedError("Please implement this function."))
         
+    def print_analysis_results(self):
+        self.analyzer.print_analysis_results()
+        

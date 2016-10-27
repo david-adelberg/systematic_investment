@@ -100,6 +100,8 @@ class RegressionAnalyzer(DFAnalyzer):
             others = data.select_dtypes(exclude=[np.number])
             data = concat([ranked, others], axis=1)
             
+        print(data)
+        print(data[:self._split_date])
         train_y, train_x = self.get_lm_y_x(self._y_key, data[:self._split_date])
         all_y, all_x = self.get_lm_y_x(self._y_key, data)
 

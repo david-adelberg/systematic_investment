@@ -43,12 +43,16 @@ class MultiModel:
     def plot_model_returns(self):
         plot_returns(self.compute_model_returns(), self._split_date)
         
-    def plot_hypothetical_portfolio_returns(self):
+    def plot_hypothetical_portfolio(self):
         returns = self.compute_model_returns()
         compounded = (1.0 + (returns / 100.0)).cumprod()
         plot_returns(compounded, self._split_date)
         
+    def print_analysis_results(self):
+        for model in self._models:
+            model.print_analysis_results()
+        
 def multi_model_create_info_interop(info, split_date, **kwargs):
-    return(MultiModel(info.models, split_date, **kwargs))
+    return(MultiModel(info._models, split_date, **kwargs))
         
         
