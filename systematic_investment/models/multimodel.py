@@ -51,6 +51,4 @@ class MultiModel:
 def multi_model_create_info_interop(info, split_date, **kwargs):
     return(MultiModel(info.models, split_date, **kwargs))
         
-            
-        
         
