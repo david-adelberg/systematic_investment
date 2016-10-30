@@ -23,6 +23,7 @@ __status__ = "Prototype"
 
 import numpy as np
 from systematic_investment.shortcuts import plot_returns
+import pandas as pd
 
 class MultiModel:
     
@@ -32,12 +33,12 @@ class MultiModel:
         
     def compute_model_returns(self):
         returns_arr = []
-        for name, model in self._models:
+        for name, model in self._models.items():
             m_rets = model.analyzer.compute_model_returns(model.calc_position_size, model.calc_transaction_cost)
             returns_arr.append(m_rets)
-            
-        returns_arr = np.array(returns_arr)
-        overall_returns = returns_arr.mean(axis=0) # Need to check this, probably wrong
+        
+        returns_df = pd.concat(returns_arr, axis=1)
+        overall_returns = returns_df.mean(axis=1)
         return(overall_returns)
         
     def plot_model_returns(self):
@@ -49,7 +50,8 @@ class MultiModel:
         plot_returns(compounded, self._split_date)
         
     def print_analysis_results(self):
-        for model in self._models:
+        for sector, model in self._models.items():
+            print("Sector: %s" % sector)
             model.print_analysis_results()
         
 def multi_model_create_info_interop(info, split_date, **kwargs):

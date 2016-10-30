@@ -50,8 +50,11 @@ class RegressionAnalyzer(DFAnalyzer):
         self._lm_x = None
         self._lm_y = None
         self._lm = None
+        self._obj = None
         self._split_date = split_date
         self._constructor=constructor
+        self._data_len = None
+        self._summary = None
 
     def get_lm_y_x(self, y_key, data):
         lm_y = data[y_key]
@@ -100,12 +103,13 @@ class RegressionAnalyzer(DFAnalyzer):
             others = data.select_dtypes(exclude=[np.number])
             data = concat([ranked, others], axis=1)
             
-        print(data)
-        print(data[:self._split_date])
         train_y, train_x = self.get_lm_y_x(self._y_key, data[:self._split_date])
         all_y, all_x = self.get_lm_y_x(self._y_key, data)
 
-        self._lm = self._constructor(train_y, train_x).fit()
+        self._data_len = len(data)
+        print("Length of all data: %i" % self._data_len)
+        self._obj = self._constructor(train_y, train_x)
+        self._lm = self._obj.fit()
         self._lm_x = all_x
         self._lm_y = all_y
         
@@ -116,7 +120,8 @@ class RegressionAnalyzer(DFAnalyzer):
         
         """
         xname = self._to_analyze.drop(self._y_key, axis=1).columns.tolist()
-        print(self._lm.summary(yname=self._y_key, xname=xname))
+        self._summary = self._lm.summary(yname=self._y_key, xname=xname)
+        print(self._summary)
             
     def plot_analysis_results(self):
         """Plots predicted versus actual."""

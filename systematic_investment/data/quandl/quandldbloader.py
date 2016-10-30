@@ -21,7 +21,10 @@ __email__ = "david.adelberg@yale.edu"
 __status__ = "Development"
 
 from systematic_investment.data.dbloader import DBLoader
-import Quandl as qd
+try:
+    import Quandl as qd
+except:
+    import quandl as qd
 
 class QuandlDBLoader(DBLoader):
     

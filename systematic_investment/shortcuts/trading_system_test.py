@@ -24,6 +24,8 @@ def test_data_processing(info):
     combiner = dl.load()
     return(combiner)
     
+import matplotlib.pyplot as plt
+    
 def test_models(info, action, *model_classes):
     """Tests models.
     
@@ -37,3 +39,15 @@ def test_models(info, action, *model_classes):
     for model_class in model_classes:
         model = model_class(info)
         action(model)
+        lengths = []
+        scores = []
+        sectors = []
+        for sector, m in model._models.items():
+            sectors.append(sector)
+            lengths.append(m.analyzer._data_len)
+            scores.append(m.analyzer._obj._score)
+        print(lengths)
+        print(scores)
+        plt.plot(lengths, scores)
+        plt.show()
+        return sectors, lengths, scores
