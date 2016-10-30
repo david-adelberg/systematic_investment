@@ -22,7 +22,10 @@ __email__ = "david.adelberg@yale.edu"
 __status__ = "Development"
 
 import pickle
-import pyfolio as pf
+try:
+    import pyfolio as pf
+except:
+    pass
 from pandas import to_datetime
 
 class TradingModel:
