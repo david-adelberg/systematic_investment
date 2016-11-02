@@ -22,11 +22,14 @@ def make_subplot():
 def plot_returns(returns, live_date=None):
     plt.figure()
     ax = make_subplot()
-    if live_date is not None:
+    if(live_date is None):
+        returns.plot(ax=ax, label="all")
+    elif(isinstance(live_date, str)):
         returns[:live_date].plot(ax=ax, label="train")
         returns[live_date:].plot(ax=ax, label="test")
     else:
-        returns.plot(ax=ax, label="all")
+        for i, (d1, d2) in enumerate(zip(live_date, live_date[1:])):
+            returns[d1:d2].plot(ax=ax, label="group %i" % (i+1))
         
 def make_boxplots(df, by, title):
     make_subplot()

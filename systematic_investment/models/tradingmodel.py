@@ -88,3 +88,6 @@ class TradingModel:
     def print_analysis_results(self):
         self.analyzer.print_analysis_results()
         
+    def get_analysis_results(self):
+        return(self.analyzer.get_analysis_results())
+        

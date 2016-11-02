@@ -36,18 +36,9 @@ def test_models(info, action, *model_classes):
     model_classes: constructors of models from info.
     
     """
+    res = []
     for model_class in model_classes:
         model = model_class(info)
-        action(model)
-        lengths = []
-        scores = []
-        sectors = []
-        for sector, m in model._models.items():
-            sectors.append(sector)
-            lengths.append(m.analyzer._data_len)
-            scores.append(m.analyzer._obj._score)
-        print(lengths)
-        print(scores)
-        plt.plot(lengths, scores)
-        plt.show()
-        return sectors, lengths, scores
+        res.append(action(model))
+    return(res)
+        

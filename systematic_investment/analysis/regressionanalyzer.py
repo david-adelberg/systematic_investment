@@ -107,11 +107,15 @@ class RegressionAnalyzer(DFAnalyzer):
         all_y, all_x = self.get_lm_y_x(self._y_key, data)
 
         self._data_len = len(data)
-        print("Length of all data: %i" % self._data_len)
         self._obj = self._constructor(train_y, train_x)
         self._lm = self._obj.fit()
         self._lm_x = all_x
         self._lm_y = all_y
+        
+    def get_analysis_results(self):
+        xname = self._to_analyze.drop(self._y_key, axis=1).columns.tolist()
+        self._summary = self._lm.summary(yname=self._y_key, xname=xname)
+        return(self._summary)
         
     def print_analysis_results(self, print_coefs=True):
         """Prints results of analysis.
@@ -119,9 +123,8 @@ class RegressionAnalyzer(DFAnalyzer):
         print_coefs: unused.
         
         """
-        xname = self._to_analyze.drop(self._y_key, axis=1).columns.tolist()
-        self._summary = self._lm.summary(yname=self._y_key, xname=xname)
-        print(self._summary)
+        print(self.get_analysis_results())
+        return(self.get_analysis_results())
             
     def plot_analysis_results(self):
         """Plots predicted versus actual."""

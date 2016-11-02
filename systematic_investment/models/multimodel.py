@@ -30,6 +30,7 @@ class MultiModel:
     def __init__(self, models, split_date=None, **kwargs):
         self._models = models
         self._split_date = split_date
+        self.run_analyses()
         
     def compute_model_returns(self):
         returns_arr = []
@@ -41,6 +42,22 @@ class MultiModel:
         overall_returns = returns_df.mean(axis=1)
         return(overall_returns)
         
+    def summarize(self):
+        names = []
+        lengths = []
+        scores = []
+        for name, m in self._models.items():
+            names.append(name)
+            lengths.append(m.analyzer._data_len)
+            scores.append(m.analyzer._obj._score)
+        
+        res = pd.DataFrame([names, lengths, scores]).T
+        res.columns = ["Name", "Length", "Score"]
+        return(res)
+        
+    def print_models(self):
+        print(self.summarize())
+        
     def plot_model_returns(self):
         plot_returns(self.compute_model_returns(), self._split_date)
         
@@ -49,10 +66,16 @@ class MultiModel:
         compounded = (1.0 + (returns / 100.0)).cumprod()
         plot_returns(compounded, self._split_date)
         
+    def run_analyses(self):
+        return({name: model.get_analysis_results() for name, model in self._models.items()})
+        
     def print_analysis_results(self):
         for sector, model in self._models.items():
             print("Sector: %s" % sector)
             model.print_analysis_results()
+            
+    def drop_bad_models(self, keep_crit):
+        self._models = {key: model for key, model in self._models.items() if keep_crit(model)}
         
 def multi_model_create_info_interop(info, split_date, **kwargs):
     return(MultiModel(info._models, split_date, **kwargs))
