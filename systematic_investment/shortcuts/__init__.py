@@ -19,3 +19,4 @@ from .plotting import *
 from .quandl import *
 from .trading_system_test import *
 from .util import *
+from .statistics import *

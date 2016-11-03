@@ -32,6 +32,9 @@ class MultiModel:
         self._split_date = split_date
         self.run_analyses()
         
+    def compute_returns_by_period(self):
+        return({key: m.compute_returns_by_period() for key, m in self._models.items()})
+        
     def compute_model_returns(self):
         returns_arr = []
         for name, model in self._models.items():
@@ -52,11 +55,11 @@ class MultiModel:
             scores.append(m.analyzer._obj._score)
         
         res = pd.DataFrame([names, lengths, scores]).T
-        res.columns = ["Name", "Length", "Score"]
+        res.columns = ["Name", "# of Training Data Points", "Score"]
         return(res)
         
     def print_models(self):
-        print(self.summarize())
+        print(self.summarize().sort_values(['Score'], ascending=False))
         
     def plot_model_returns(self):
         plot_returns(self.compute_model_returns(), self._split_date)

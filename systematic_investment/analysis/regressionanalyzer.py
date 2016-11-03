@@ -102,11 +102,21 @@ class RegressionAnalyzer(DFAnalyzer):
             ranked = ranked.rank(pct=True).apply(unif_to_normal)
             others = data.select_dtypes(exclude=[np.number])
             data = concat([ranked, others], axis=1)
-            
-        train_y, train_x = self.get_lm_y_x(self._y_key, data[:self._split_date])
-        all_y, all_x = self.get_lm_y_x(self._y_key, data)
+        
+        train_y = None
+        train_x = None
+        all_y = None
+        all_x = None
+        
+        if(isinstance(self._split_date, str)):
+            train_y, train_x = self.get_lm_y_x(self._y_key, data[:self._split_date])
+            all_y, all_x = self.get_lm_y_x(self._y_key, data)
+            self._data_len = len(data[:self._split_date])
+        else:
+            train_y, train_x = self.get_lm_y_x(self._y_key, data[:self._split_date[0]])
+            all_y, all_x = self.get_lm_y_x(self._y_key, data)
+            self._data_len = len(data[:self._split_date[0]])
 
-        self._data_len = len(data)
         self._obj = self._constructor(train_y, train_x)
         self._lm = self._obj.fit()
         self._lm_x = all_x

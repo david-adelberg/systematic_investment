@@ -47,6 +47,17 @@ class TradingModel:
             self.analyzer = info.analyzer.create()
             self.analyzer.analyze(y_name, path_name, **kwargs)
             
+    def compute_returns_by_period(self):
+        rets = self.analyzer.compute_model_returns(self.calc_position_size, self.calc_transaction_cost)
+        compounded = (1.0 + (rets / 100.0)).cumprod()
+        groups = [compounded[d1:d2] for d1, d2 in zip(self._split_date, self._split_date[1:])]
+        temp = [compounded[:self._split_date[0]]]
+        temp.extend(groups)
+        groups = temp
+        groups = [g.loc[g.index != d] for d,g in zip(self._split_date, groups)]
+        groups.append(compounded[self._split_date[-1]:])
+        return([100 * ((g[-1] / g[0]) - 1) for g in groups])
+            
     """Only works in models with daily data"""
     def print_tear_sheet(self):
         rets = self.analyzer.compute_model_returns(self.calc_position_size, self.calc_transaction_cost)

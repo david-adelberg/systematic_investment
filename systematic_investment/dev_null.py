@@ -519,3 +519,10 @@ def transform_percentage(x):
     #'INDUSTRY-processed-data.csv',
                 # compute_names=make_default_compute_names([], identity),
                 # load=False, idx_to_datetime=identity, resample_method=None). \
+    
+    #Doing this differently: res.add_transformation(identity, ('INDUSTRY', 'Sector'), name=('CALC', 'Sector'), drop_old=False)        
+        
+        #res.add_transformation(log, ('SF0', 'Revenues (USD)'), name=('CALC', 'size'), drop_old=False)
+        #res.add_transformation(identity, ('SF0', 'Current Ratio'), name=('CALC', 'Current Ratio'), drop_old=False)
+        #res.add_transformation(identity, ('SF0', 'Debt to Equity Ratio'), name=('CALC', 'Debt to Equity Ratio'), drop_old=False)        
+        #res.add_transformation(smart_divide, ('SF0', 'Gross Profit'), ('SF0', 'Revenues (USD)'), name=('CALC', 'Gross Margin'), drop_old=False)

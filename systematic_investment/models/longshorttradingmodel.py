@@ -29,7 +29,9 @@ class LongShortTradingModel(TradingModel):
         
     @staticmethod
     def calc_position_size(preds):
-        return(preds/preds.abs().sum())
+        ranked = preds.rank(pct=True)
+        tpreds = preds[(ranked>=0.95) | (ranked <= 0.05)].fillna(0.0)
+        return(tpreds/tpreds.abs().sum())
         #tot = sum(abs(preds))
         #return((preds)/tot)
         

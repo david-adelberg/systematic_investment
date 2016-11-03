@@ -25,5 +25,5 @@ def reg_create_func(info, **kwargs):
     from systematic_investment.analysis import RegressionAnalyzer
     def res():
         df = read_csv(info.combined_df.path, index_col = [0,1], header=[0,1])
-        return(RegressionAnalyzer(df, info.y_key, '2011-01-01', **kwargs))
+        return(RegressionAnalyzer(df, info.y_key, info._split_date, **kwargs))
     return(res)
